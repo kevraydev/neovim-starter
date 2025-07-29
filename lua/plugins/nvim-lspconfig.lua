@@ -26,7 +26,7 @@ return {
       local lsp_attach = function(client, bufnr)
       end
 
-      require('mason-lspconfig').setup_handlers({
+      require('mason-lspconfig').setup({
         function(server_name)
           lspconfig[server_name].setup({
             on_attach = lsp_attach,
