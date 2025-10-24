@@ -1,5 +1,5 @@
 return {
-  -- LSP
+  -- LSP Support
   {
     'neovim/nvim-lspconfig',
     event = 'VeryLazy',
@@ -10,43 +10,36 @@ return {
       { 'folke/neodev.nvim', opts = {} },
     },
     config = function ()
-      require('mason').setup()
+      require('mason').setup({})
       require('mason-lspconfig').setup({
         ensure_installed = {
           'lua_ls',
           'lemminx',
           'marksman',
           'emmet_ls',
-          'eslint',  -- Add eslint to list of LSPs
-        }
+          'eslint',
+          'ts_ls',
+          'vue_ls',
+          'tailwindcss',
+        },
       })
 
-      local lspconfig = require('lspconfig')
       local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
-      local lsp_attach = function(client, bufnr)
-      end
-
-      require('mason-lspconfig').setup({
-        function(server_name)
-          lspconfig[server_name].setup({
-            on_attach = lsp_attach,
-            capabilities = lsp_capabilities,
-          })
-        end
-      })
-
-      lspconfig.lua_ls.setup {
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = {'vim'},
+      vim.lsp.config('ts_ls', {
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vim.fn.expand("$MASON/packages/vue-language-server/node_modules/@vue/language-server"),
+              languages = { 'vue' },
             },
           },
         },
-      }
+        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue', 'svelte' },
+      })
 
-      -- Setup for emmet-ls
-      lspconfig.emmet_ls.setup({
+      -- emmet-ls
+      vim.lsp.config('emmet_ls',{
         capabilities = lsp_capabilities,
         filetypes = { "css", "eruby", "html", "javascript", "javascriptreact", "less", "sass", "scss", "svelte", "pug", "typescriptreact", "vue" },
         init_options = {
@@ -58,18 +51,17 @@ return {
         },
       })
 
-      -- Setup for eslint
-      lspconfig.eslint.setup({
+      -- eslint
+      vim.lsp.config('eslint', {
         capabilities = lsp_capabilities,
         on_attach = lsp_attach,
         filetypes = { "javascript", "javascriptreact", "vue", "typescript", "typescriptreact" },
-        root_dir = lspconfig.util.root_pattern(".eslintrc.js", ".eslintrc.json", ".git"),
         settings = {
           format = { enable = true },
         },
       })
 
-      -- Configure LSP floating preview popups
+      -- LSP for floating preview popups
       local open_floating_preview = vim.lsp.util.open_floating_preview
       function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
         opts = opts or {}
@@ -79,23 +71,6 @@ return {
     end
   },
 
-  -- Tailwind Tools
-  {
-    "luckasRanarison/tailwind-tools.nvim",
-    name = "tailwind-tools",
-    build = ":UpdateRemotePlugins",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-telescope/telescope.nvim",
-      "neovim/nvim-lspconfig",
-    },
-    opts = {
-      autoComplete = true,
-    },
-    config = function()
-      require("tailwind-tools").setup({
-      })
-    end,
-  },
+
 }
 
